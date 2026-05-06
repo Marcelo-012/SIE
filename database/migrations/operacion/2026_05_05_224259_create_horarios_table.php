@@ -12,7 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('horarios', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_horario');
+            $table->foreignId('id_grupo')->constrained('grupos', 'id_grupo');
+            $table->enum('dia_semana', [
+                'lunes',
+                'martes',
+                'miercoles',
+                'jueves',
+                'viernes'
+            ]);
+            $table->time('hora_inicio');
+            $table->time('hora_final');
+            $table->string('salon', 20);
             $table->timestamps();
         });
     }

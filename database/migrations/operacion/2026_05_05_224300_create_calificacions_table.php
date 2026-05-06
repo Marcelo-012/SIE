@@ -12,8 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('calificacions', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_calificacion');
+            $table->foreignId('id_inscripcion')->constrained('inscripcions', 'id_inscripcion');
+            $table->integer('unidad');
+            $table->integer('calificacion');
+            $table->date('fecha');
+            $table->integer('califiacion_final')->nullable();
             $table->timestamps();
+
+            // Solo 3 unidades por inscripción
+            $table->unique(['id_inscripcion', 'unidad']);
+            $table->check('calificacion BETWEEN 0 AND 100');
         });
     }
 

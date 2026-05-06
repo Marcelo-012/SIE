@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('materias', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_materia');
+            $table->string('clave_materia', 10)->unique();
+            $table->string('nombre_materia', 50);
+            $table->integer('unidades')->default(1);
+            $table->integer('creditos');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::dropIfExists('materias');
