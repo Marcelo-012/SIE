@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -22,8 +23,8 @@ return new class extends Migration
 
             // Solo 3 unidades por inscripción
             $table->unique(['id_inscripcion', 'unidad']);
-            $table->check('calificacion BETWEEN 0 AND 100');
         });
+        DB::statement('ALTER TABLE calificaciones ADD CONSTRAINT chk_calificacion CHECK (calificacion >= 0 AND calificacion <= 100)');
     }
 
     /**
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('calificacions');
+        Schema::dropIfExists('calificaciones');
     }
 };

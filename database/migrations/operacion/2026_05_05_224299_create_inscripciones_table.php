@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,12 +20,12 @@ return new class extends Migration
             $table->enum('estatus', ['cursando', 'aprobado', 'reprobado'])->default('cursando');
             $table->timestamps();
 
-            // Restricciones
-            $table->check('intento BETWEEN 1 AND 3');
 
             // Un alumno solo puede estar una vez por grupo (evita duplicados)
             $table->unique(['id_alumno', 'id_grupo']);
         });
+
+        DB::statement('ALTER TABLE inscripciones ADD CONSTRAINT chk_intento CHECK (intento BETWEEN 1 AND 3)');
     }
 
     /**
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inscripcions');
+        Schema::dropIfExists('inscripciones');
     }
 };
