@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ciclo_escolars', function (Blueprint $table) {
+        Schema::create('ciclo_escolares', function (Blueprint $table) {
             $table->id('id_ciclo_escolar');
             $table->string('nombre_ciclo_escolar', 50)->unique();
             $table->date('fecha_inicio');

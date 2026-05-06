@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('horarios', function (Blueprint $table) {
             $table->id('id_horario');
-            $table->foreignId('id_grupo')->constrained('grupos', 'id_grupo');
+            $table->foreignId('id_grupo')->constrained('grupos', 'id_grupo')->onDelete('cascade');
             $table->enum('dia_semana', [
                 'lunes',
                 'martes',
@@ -23,8 +23,11 @@ return new class extends Migration
             ]);
             $table->time('hora_inicio');
             $table->time('hora_final');
-            $table->string('salon', 20);
+            $table->string('salon', 20)->nullable();
             $table->timestamps();
+
+            // Evitar horarios duplicados para el mismo grupo
+            $table->unique(['id_grupo', 'dia_semana', 'hora_inicio'], 'unique_horario_grupo');
         });
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_grupo');
             $table->foreignId('id_materia')->constrained('materias', 'id_materia');
             $table->foreignId('id_docente')->constrained('docentes', 'id_docente');
-            $table->foreignId('id_ciclo_escolar')->constrained('ciclo_escolars', 'id_ciclo_escolar');
+            $table->foreignId('id_ciclo_escolar')->constrained('ciclo_escolares', 'id_ciclo_escolar');
             $table->string('letra', 1);
             $table->string('salon', 2);
             $table->integer('cupo')->default(0);

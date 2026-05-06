@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,4 +18,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+
+
+// routes/web.php
+Route::middleware(['auth:docente'])->group(function () {
+    Route::get('/completar-perfil', [DocenteController::class, 'mostrarCompletarPerfil'])
+        ->name('docentes.completar-perfil');
+    Route::post('/completar-perfil', [DocenteController::class, 'completarPerfil']);
+
+    // Route::middleware('perfil.completo')->group(function () {
+    //     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    //     ... otras rutas
+    // });
+});
+
+require __DIR__ . '/auth.php';

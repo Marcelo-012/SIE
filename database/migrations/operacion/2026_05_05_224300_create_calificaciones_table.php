@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('calificacions', function (Blueprint $table) {
+        Schema::create('calificaciones', function (Blueprint $table) {
             $table->id('id_calificacion');
-            $table->foreignId('id_inscripcion')->constrained('inscripcions', 'id_inscripcion');
+            $table->foreignId('id_inscripcion')->constrained('inscripciones', 'id_inscripcion');
             $table->integer('unidad');
             $table->integer('calificacion');
             $table->date('fecha');

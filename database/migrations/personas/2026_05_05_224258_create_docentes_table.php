@@ -6,50 +6,50 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('docentes', function (Blueprint $table) {
             $table->id('id_docente');
+
+            // DATOS DE REGISTRO (obligatorios)
+            $table->string('rfc', 13)->unique();
             $table->string('nombre', 30);
             $table->string('apellido_pat', 30);
             $table->string('apellido_mat', 30);
-            $table->date('fecha_nacimiento');
-            $table->string('curp')->unique();
-            $table->enum('genero', ['masculino', 'femenino']);
+            $table->string('password');
+
+            // DATOS PARA COMPLETAR DESPUÉS (nullables)
+            $table->date('fecha_nacimiento')->nullable();
+            $table->string('curp', 18)->unique()->nullable();
+            $table->enum('genero', ['masculino', 'femenino'])->nullable();
             $table->enum('estado_civil', [
                 'soltero',
                 'casado',
                 'divorciado',
                 'viudo',
                 'otro'
-            ]);
+            ])->nullable();
 
-            $table->string('calle y numero', 100);
-            $table->string('colonia', 50);
-            $table->string('municipio', 50);
-            $table->string('estado', 30);
-            $table->string('codigo_postal', 5);
+            // Dirección
+            $table->string('calle_numero', 100)->nullable();  // Sin espacios en nombre columna
+            $table->string('colonia', 50)->nullable();
+            $table->string('municipio', 50)->nullable();
+            $table->string('estado', 30)->nullable();
+            $table->string('codigo_postal', 5)->nullable();
 
-            $table->string('telefono', 10);
-            $table->string('correo')->unique();
-            $table->string('rfc')->unique();
-            $table->string('nivel_estudio', 50);
-            $table->date('antiguedad');
-            $table->enum('status', ['activo', 'inactivo'])->default('activo');
+            // Contacto y profesional
+            $table->string('telefono', 10)->nullable();
+            $table->string('correo')->unique()->nullable();
+            $table->string('nivel_estudio', 50)->nullable();
+            $table->date('antiguedad')->nullable();
+            $table->enum('status', ['activo', 'inactivo'])->default('inactivo');
 
-            $table->string('password', 60);
-
-
+            $table->boolean('perfil_completo')->default(false);
+            $table->rememberToken();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('docentes');

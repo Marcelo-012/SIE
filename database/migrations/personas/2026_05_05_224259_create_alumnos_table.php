@@ -28,7 +28,7 @@ return new class extends Migration
                 'otro'
             ]);
 
-            $table->string('calle y numero', 100);
+            $table->string('calle_y_numero', 100);
             $table->string('colonia', 50);
             $table->string('municipio', 50);
             $table->string('estado', 30);
