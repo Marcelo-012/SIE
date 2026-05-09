@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\personas\CompletarPerfilDocenteRequest;
 use App\Http\Requests\UpdateDocenteRequest;
-use Docente;
+use App\Models\personas\Docente;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Request;
 

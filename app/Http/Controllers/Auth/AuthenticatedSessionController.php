@@ -11,35 +11,41 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
     public function create(): View
     {
         return view('auth.login');
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Procesa el login, obtiene el guard usado y redirige al dashboard correcto.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $guard = $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return match ($guard) {
+            'docente' => redirect()->route('docente.dashboard'),
+            'alumno'  => redirect()->route('alumno.dashboard'),
+            default   => redirect()->intended(route('dashboard', absolute: false)),
+        };
     }
 
     /**
-     * Destroy an authenticated session.
+     * Cierra la sesión del guard activo (docente, alumno o web).
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        // Determinar qué guard está autenticado y cerrar solo ese
+        foreach (['docente', 'alumno', 'web'] as $guard) {
+            if (Auth::guard($guard)->check()) {
+                Auth::guard($guard)->logout();
+                break;
+            }
+        }
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

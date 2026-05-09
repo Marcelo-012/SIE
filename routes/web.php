@@ -20,16 +20,18 @@ Route::middleware('auth')->group(function () {
 
 
 
-// routes/web.php
+Route::middleware(['auth:alumno'])->group(function () {
+    Route::get('/alumno/dashboard', fn () => view('alumnos.dashboard'))
+        ->name('alumno.dashboard');
+});
+
 Route::middleware(['auth:docente'])->group(function () {
+    Route::get('/docente/dashboard', fn () => view('docentes.dashboard'))
+        ->name('docente.dashboard');
+
     Route::get('/completar-perfil', [DocenteController::class, 'mostrarCompletarPerfil'])
         ->name('docentes.completar-perfil');
     Route::post('/completar-perfil', [DocenteController::class, 'completarPerfil']);
-
-    // Route::middleware('perfil.completo')->group(function () {
-    //     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    //     ... otras rutas
-    // });
 });
 
 require __DIR__ . '/auth.php';

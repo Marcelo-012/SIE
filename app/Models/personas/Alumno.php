@@ -1,17 +1,22 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\personas;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class Alumno extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'alumnos';
-    protected $primaryKey = 'id_alumno';
-    public $timestamps = false; // ajusta según tu tabla
+
+    // "matricula" es el identificador único con el que el alumno inicia sesión.
+    // Auth::id() devolverá '22730346' (string) y sessions.user_id lo almacena correctamente.
+    protected $primaryKey = 'matricula';
+    public    $incrementing = false;      // no es auto-increment
+    protected $keyType     = 'string';   // indica a Eloquent que el PK es texto
 
     protected $fillable = [
         'matricula',
@@ -22,7 +27,7 @@ class Alumno extends Authenticatable
         'curp',
         'genero',
         'estado_civil',
-        'calle_numero', // corregido
+        'calle_y_numero',
         'colonia',
         'municipio',
         'estado',
@@ -42,8 +47,12 @@ class Alumno extends Authenticatable
 
     protected $casts = [
         'fecha_nacimiento' => 'date',
-        'password' => 'hashed',
+        'password'         => 'hashed',
     ];
+
+    // getAuthIdentifierName() ya no es necesario sobreescribirlo:
+    // hereda de Authenticatable -> getKeyName() -> 'matricula'
+    // getAuthIdentifier() -> $this->matricula -> '22730346' (string)
 
     public function getNombreCompletoAttribute(): string
     {
@@ -60,10 +69,5 @@ class Alumno extends Authenticatable
     public function scopeActivos($query)
     {
         return $query->where('status', 'activo');
-    }
-
-    public function scopePorMatricula($query, string $matricula)
-    {
-        return $query->where('matricula', $matricula);
     }
 }
