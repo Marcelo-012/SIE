@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\personas\CompletarPerfilDocenteRequest;
 use App\Http\Requests\UpdateDocenteRequest;
 use App\Models\personas\Docente;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Support\Facades\Hash;
 
 class DocenteController extends Controller
 {
@@ -67,9 +68,12 @@ class DocenteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Docente $docente)
+    public function show()
     {
-        return view('docentes.show', compact('docente'));
+        $usuario = Docente::with(['centroTrabajo', 'plazas', 'nombramiento'])
+            ->findOrFail(auth('docente')->id());
+
+        return view('docentes.perfil.informacion-personal', compact('usuario'));
     }
 
     /**
@@ -101,4 +105,39 @@ class DocenteController extends Controller
         return redirect()->route('docentes.index')
             ->with('success', 'Docente eliminado exitosamente');
     }
+
+    public function mostrarCambiarContrasena()
+    {
+        return redirect()->route('docente.dashboard')->with('activeTab', 'opciones');
+    }
+
+    public function cambiarContrasena(Request $request)
+    {
+        $request->validate([
+            'password_actual'             => ['required'],
+            'password_nueva'              => ['required', 'min:8', 'regex:/[0-9]/', 'regex:/[^A-Za-z0-9]/', 'confirmed'],
+            'password_nueva_confirmation' => ['required'],
+        ], [
+            'password_nueva.min'     => 'La contraseña nueva debe tener al menos 8 caracteres.',
+            'password_nueva.regex'   => 'La contraseña nueva debe incluir al menos 1 número y 1 carácter especial.',
+            'password_nueva.confirmed' => 'Las contraseñas nuevas no coinciden.',
+        ]);
+
+        /** @var Docente $docente */
+        $docente = auth('docente')->user();
+
+        if (! Hash::check($request->password_actual, $docente->password)) {
+            return back()
+                ->withErrors(['password_actual' => 'La contraseña actual no es correcta.'])
+                ->with('activeTab', 'opciones');
+        }
+
+        // El cast 'hashed' del modelo aplica Hash::make() automáticamente
+        $docente->update(['password' => $request->password_nueva]);
+
+        return redirect()->route('docente.dashboard')
+            ->with('success', 'Contraseña cambiada exitosamente.')
+            ->with('activeTab', 'opciones');
+    }
+
 }
