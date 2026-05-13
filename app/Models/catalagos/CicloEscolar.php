@@ -9,7 +9,7 @@ class CicloEscolar extends Model
 {
     use HasFactory;
 
-    protected $table = 'ciclos_escolares';
+    protected $table = 'ciclo_escolares';
     protected $primaryKey = 'id_ciclo_escolar';
 
     protected $fillable = [

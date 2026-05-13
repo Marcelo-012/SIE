@@ -57,4 +57,11 @@ class Docente extends Authenticatable
     // getAuthIdentifierName() ya no es necesario sobreescribirlo:
     // hereda de Authenticatable -> getKeyName() -> 'usuario'
     // getAuthIdentifier() -> $this->usuario -> 'edgar.garcia' (string)
+
+    public function grupos()
+    {
+        // La FK grupos.id_docente apunta al bigint id_docente de docentes,
+        // no al string 'usuario', por eso especificamos la localKey explícita.
+        return $this->hasMany(\App\Models\Grupo::class, 'id_docente', 'id_docente');
+    }
 }

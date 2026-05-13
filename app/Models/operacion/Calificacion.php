@@ -19,13 +19,17 @@ class Calificacion extends Model
         'calificacion',
         'fecha',
         'califiacion_final',
+        'cal_diagnostica',
+        'cal_reporte_intermedio',
     ];
 
     protected $casts = [
-        'unidad' => 'integer',
-        'calificacion' => 'integer',
-        'fecha' => 'date',
-        'califiacion_final' => 'integer',
+        'unidad'                 => 'integer',
+        'calificacion'           => 'integer',
+        'fecha'                  => 'date',
+        'califiacion_final'      => 'integer',
+        'cal_diagnostica'        => 'integer',
+        'cal_reporte_intermedio' => 'integer',
     ];
 
 

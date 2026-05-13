@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard — {{ config('app.name') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:300,400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -149,7 +150,13 @@
      LAYOUT RAÍZ
 ================================================================ --}}
 <div class="flex h-screen overflow-hidden"
-     x-data="{ sidebarOpen: true, paginaActiva: '{{ session('activeTab', 'inicio') }}' }">
+     x-data="{
+         sidebarOpen:     true,
+         paginaActiva:    '{{ session('activeTab', 'inicio') }}',
+         cursosOpen:      {{ in_array(session('activeTab', 'inicio'), ['cursos','grupos','propedeutico','tutorias']) ? 'true' : 'false' }},
+         opcionesOpen:    {{ session('activeTab', 'inicio') === 'opciones' ? 'true' : 'false' }},
+         opcionSubActiva: 'cambiar'
+     }">
 
     {{-- ============================================================
          SIDEBAR
@@ -189,54 +196,97 @@
         {{-- Navegación --}}
         <nav class="flex-1 px-3 space-y-0.5 overflow-y-auto">
 
-            @php
-                $navItems = [
-                    ['key' => 'inicio',       'label' => 'Inicio',       'icon' => 'home'],
-                    ['key' => 'cursos',       'label' => 'Cursos',       'icon' => 'book'],
-                    ['key' => 'grupos',       'label' => 'Grupos',       'icon' => 'users'],
-                    ['key' => 'propedeutico', 'label' => 'Propedéutico', 'icon' => 'flask'],
-                    ['key' => 'tutorias',     'label' => 'Tutorías',     'icon' => 'chat'],
-                ];
-            @endphp
-
-            @foreach($navItems as $item)
-            <button @click="paginaActiva = '{{ $item['key'] }}'"
-                    :class="paginaActiva === '{{ $item['key'] }}'
+            {{-- Inicio --}}
+            <button @click="paginaActiva = 'inicio'"
+                    :class="paginaActiva === 'inicio'
                         ? 'bg-purple-50 text-purple-700 font-semibold'
                         : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
                     class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left">
-                @if($item['icon'] === 'home')
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                @elseif($item['icon'] === 'book')
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                </svg>
-                @elseif($item['icon'] === 'users')
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                @elseif($item['icon'] === 'flask')
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                </svg>
-                @else
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                @endif
-                <span class="whitespace-nowrap">{{ $item['label'] }}</span>
-                <template x-if="paginaActiva === '{{ $item['key'] }}'">
+                <span class="whitespace-nowrap">Inicio</span>
+                <template x-if="paginaActiva === 'inicio'">
                     <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
                 </template>
             </button>
-            @endforeach
+
+            {{-- Cursos (con submenú expandible) --}}
+            <div>
+                <button @click="cursosOpen = !cursosOpen; if (!cursosOpen) paginaActiva = 'cursos'"
+                        :class="['cursos','grupos','propedeutico','tutorias'].includes(paginaActiva)
+                            ? 'bg-purple-50 text-purple-700 font-semibold'
+                            : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <span class="whitespace-nowrap">Cursos</span>
+                    <svg :class="cursosOpen ? 'rotate-90' : ''"
+                         class="ml-auto w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+
+                {{-- Submenú de Cursos --}}
+                <div x-show="cursosOpen"
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 -translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mt-0.5 ml-3 pl-3 border-l-2 border-slate-100 space-y-0.5">
+
+                    {{-- Grupos --}}
+                    <button @click="paginaActiva = 'grupos'"
+                            :class="paginaActiva === 'grupos'
+                                ? 'bg-purple-50 text-purple-700 font-semibold'
+                                : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors text-left">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="whitespace-nowrap">Grupos</span>
+                        <template x-if="paginaActiva === 'grupos'">
+                            <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                        </template>
+                    </button>
+
+                    {{-- Propedéutico --}}
+                    <button @click="paginaActiva = 'propedeutico'"
+                            :class="paginaActiva === 'propedeutico'
+                                ? 'bg-purple-50 text-purple-700 font-semibold'
+                                : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors text-left">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                        <span class="whitespace-nowrap">Propedéutico</span>
+                        <template x-if="paginaActiva === 'propedeutico'">
+                            <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                        </template>
+                    </button>
+
+                    {{-- Tutorías --}}
+                    <button @click="paginaActiva = 'tutorias'"
+                            :class="paginaActiva === 'tutorias'
+                                ? 'bg-purple-50 text-purple-700 font-semibold'
+                                : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors text-left">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        <span class="whitespace-nowrap">Tutorías</span>
+                        <template x-if="paginaActiva === 'tutorias'">
+                            <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                        </template>
+                    </button>
+                </div>
+            </div>
 
             <div class="my-2 border-t border-slate-100"></div>
 
@@ -256,22 +306,67 @@
                 </template>
             </button>
 
-            {{-- Opciones --}}
-            <button @click="paginaActiva = 'opciones'"
-                    :class="paginaActiva === 'opciones'
-                        ? 'bg-purple-50 text-purple-700 font-semibold'
-                        : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span class="whitespace-nowrap">Opciones</span>
-                <template x-if="paginaActiva === 'opciones'">
-                    <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
-                </template>
-            </button>
+            {{-- Opciones (con submenú expandible) --}}
+            <div>
+                <button @click="opcionesOpen = !opcionesOpen; if (!opcionesOpen) paginaActiva = 'inicio'"
+                        :class="paginaActiva === 'opciones'
+                            ? 'bg-purple-50 text-purple-700 font-semibold'
+                            : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="whitespace-nowrap">Opciones</span>
+                    <svg :class="opcionesOpen ? 'rotate-90' : ''"
+                         class="ml-auto w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+
+                {{-- Submenú de Opciones --}}
+                <div x-show="opcionesOpen"
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 -translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mt-0.5 ml-3 pl-3 border-l-2 border-slate-100 space-y-0.5">
+
+                    {{-- Cambiar contraseña --}}
+                    <button @click="paginaActiva = 'opciones'; opcionSubActiva = 'cambiar'; opcionesOpen = true"
+                            :class="paginaActiva === 'opciones' && opcionSubActiva === 'cambiar'
+                                ? 'bg-purple-50 text-purple-700 font-semibold'
+                                : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors text-left">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        <span class="whitespace-nowrap">Cambiar contraseña</span>
+                        <template x-if="paginaActiva === 'opciones' && opcionSubActiva === 'cambiar'">
+                            <div class="ml-auto w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
+                        </template>
+                    </button>
+
+                    {{-- Cerrar sesión --}}
+                    <button @click="paginaActiva = 'opciones'; opcionSubActiva = 'cerrar'; opcionesOpen = true"
+                            :class="paginaActiva === 'opciones' && opcionSubActiva === 'cerrar'
+                                ? 'bg-red-50 text-red-600 font-semibold'
+                                : 'text-gray-500 hover:bg-red-50 hover:text-red-500'"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors text-left">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span class="whitespace-nowrap">Cerrar sesión</span>
+                        <template x-if="paginaActiva === 'opciones' && opcionSubActiva === 'cerrar'">
+                            <div class="ml-auto w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                        </template>
+                    </button>
+
+                </div>
+            </div>
         </nav>
 
         {{-- Ocultar menú --}}
@@ -360,37 +455,72 @@
 
                     @php
                         $cards = [
-                            ['key'=>'cursos',       'label'=>'Cursos',       'desc'=>'Gestiona tus materias asignadas',       'gradId'=>'grad-cursos',  'icon'=>'book'],
-                            ['key'=>'mis-datos',    'label'=>'Mis datos',    'desc'=>'Información personal y académica',       'gradId'=>'grad-datos',   'icon'=>'id'],
-                            ['key'=>'propedeutico', 'label'=>'Propedéutico', 'desc'=>'Módulo de seguimiento propedéutico',     'gradId'=>'grad-prope',   'icon'=>'flask'],
-                            ['key'=>'tutorias',     'label'=>'Tutorías',     'desc'=>'Seguimiento a alumnos tutorados',        'gradId'=>'grad-tutorias','icon'=>'chat'],
+                            [
+                                'key'   => 'cursos',
+                                'label' => 'Cursos',
+                                'desc'  => 'Gestiona tus materias asignadas',
+                                'bg'    => 'bg-purple-50 hover:bg-purple-100 border-purple-100 hover:border-purple-200',
+                                'icon-bg'   => 'bg-purple-100 group-hover:bg-purple-200',
+                                'icon-text' => 'text-purple-600',
+                                'grad-from' => '#a855f7', 'grad-to' => '#7c3aed',
+                                'icon' => 'book',
+                            ],
+                            [
+                                'key'   => 'mis-datos',
+                                'label' => 'Mis datos',
+                                'desc'  => 'Información personal y académica',
+                                'bg'    => 'bg-blue-50 hover:bg-blue-100 border-blue-100 hover:border-blue-200',
+                                'icon-bg'   => 'bg-blue-100 group-hover:bg-blue-200',
+                                'icon-text' => 'text-blue-600',
+                                'grad-from' => '#38bdf8', 'grad-to' => '#2563eb',
+                                'icon' => 'id',
+                            ],
+                            [
+                                'key'   => 'propedeutico',
+                                'label' => 'Propedéutico',
+                                'desc'  => 'Módulo de seguimiento propedéutico',
+                                'bg'    => 'bg-amber-50 hover:bg-amber-100 border-amber-100 hover:border-amber-200',
+                                'icon-bg'   => 'bg-amber-100 group-hover:bg-amber-200',
+                                'icon-text' => 'text-amber-600',
+                                'grad-from' => '#fbbf24', 'grad-to' => '#d97706',
+                                'icon' => 'flask',
+                            ],
+                            [
+                                'key'   => 'tutorias',
+                                'label' => 'Tutorías',
+                                'desc'  => 'Seguimiento a alumnos tutorados',
+                                'bg'    => 'bg-emerald-50 hover:bg-emerald-100 border-emerald-100 hover:border-emerald-200',
+                                'icon-bg'   => 'bg-emerald-100 group-hover:bg-emerald-200',
+                                'icon-text' => 'text-emerald-600',
+                                'grad-from' => '#34d399', 'grad-to' => '#059669',
+                                'icon' => 'chat',
+                            ],
                         ];
                     @endphp
 
-                    @foreach($cards as $card)
+                    @foreach($cards as $i => $card)
                     <button @click="paginaActiva = '{{ $card['key'] }}'"
-                            class="group bg-blue-50 hover:bg-blue-100 border border-blue-100
-                                   rounded-2xl p-5 flex items-center gap-4 transition-all text-left
-                                   hover:shadow-md hover:border-blue-200 active:scale-[0.98]">
-                        <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl
+                            class="group {{ $card['bg'] }} border rounded-2xl p-5 flex items-center gap-4
+                                   transition-all text-left hover:shadow-md active:scale-[0.98]">
+                        <div class="w-12 h-12 {{ $card['icon-bg'] }} rounded-xl
                                     flex items-center justify-center flex-shrink-0 transition-colors">
                             @if($card['icon'] === 'book')
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 {{ $card['icon-text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                             @elseif($card['icon'] === 'id')
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 {{ $card['icon-text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c0 2 1.5 3 3 3s3-1 3-3"/>
                             </svg>
                             @elseif($card['icon'] === 'flask')
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 {{ $card['icon-text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
                             </svg>
                             @else
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 {{ $card['icon-text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
@@ -400,19 +530,18 @@
                             <p class="font-bold text-gray-800 text-base">{{ $card['label'] }}</p>
                             <p class="text-xs text-gray-500 mt-0.5 truncate">{{ $card['desc'] }}</p>
                         </div>
-                        {{-- Ícono circular gradiente --}}
                         <div class="w-10 h-10 flex-shrink-0">
                             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
                                 <defs>
-                                    <linearGradient id="{{ $card['gradId'] }}" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%"   style="stop-color:#38bdf8"/>
-                                        <stop offset="100%" style="stop-color:#a855f7"/>
+                                    <linearGradient id="grad-card-{{ $i }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%"   style="stop-color:{{ $card['grad-from'] }}"/>
+                                        <stop offset="100%" style="stop-color:{{ $card['grad-to'] }}"/>
                                     </linearGradient>
                                 </defs>
-                                <path fill="url(#{{ $card['gradId'] }})"
+                                <path fill="url(#grad-card-{{ $i }})"
                                       d="M50,5 A45,45 0 1,1 5,50 A45,45 0 0,1 50,5 Z M50,18 A32,32 0 1,0 82,50 A32,32 0 0,0 50,18 Z"/>
-                                <polygon fill="url(#{{ $card['gradId'] }})" points="50,2 58,20 42,20"/>
-                                <polygon fill="url(#{{ $card['gradId'] }})" points="98,50 80,42 80,58"/>
+                                <polygon fill="url(#grad-card-{{ $i }})" points="50,2 58,20 42,20"/>
+                                <polygon fill="url(#grad-card-{{ $i }})" points="98,50 80,42 80,58"/>
                             </svg>
                         </div>
                     </button>
@@ -666,17 +795,20 @@
             </div>{{-- /panel mis-datos --}}
 
             {{-- ══════════════════════════════════════════════════════
-                 PANELES PLACEHOLDER (Cursos, Grupos, Propedéutico,
-                 Tutorías, Opciones) — reemplázalos con tu contenido
+                 PANEL: GRUPOS (funcional)
             ══════════════════════════════════════════════════════ --}}
-            @foreach(['cursos'=>'Cursos','grupos'=>'Grupos','propedeutico'=>'Propedéutico','tutorias'=>'Tutorías'] as $key => $label)
-            <div x-show="paginaActiva === '{{ $key }}'"
+            @include('docentes.partials.grupos-panel')
+
+            {{-- ══════════════════════════════════════════════════════
+                 PANEL PLACEHOLDER: Cursos
+            ══════════════════════════════════════════════════════ --}}
+            <div x-show="paginaActiva === 'cursos'"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 translate-y-1"
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="p-6 lg:p-8">
                 <div class="mb-6">
-                    <h1 class="text-xl font-extrabold text-gray-800">{{ $label }}</h1>
+                    <h1 class="text-xl font-extrabold text-gray-800">Cursos</h1>
                     <p class="text-sm text-gray-400 mt-0.5">Módulo en desarrollo</p>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm
@@ -687,11 +819,20 @@
                                   d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
                     </div>
-                    <p class="text-gray-400 text-sm font-medium">El módulo de <strong>{{ $label }}</strong> aún está en desarrollo.</p>
+                    <p class="text-gray-400 text-sm font-medium">El módulo de <strong>Cursos</strong> aún está en desarrollo.</p>
                     <p class="text-gray-300 text-xs mt-1">Pronto estará disponible.</p>
                 </div>
             </div>
-            @endforeach
+
+            {{-- ══════════════════════════════════════════════════════
+                 PANEL: PROPEDÉUTICO
+            ══════════════════════════════════════════════════════ --}}
+            @include('docentes.partials.propedeutico-panel')
+
+            {{-- ══════════════════════════════════════════════════════
+                 PANEL: TUTORÍAS
+            ══════════════════════════════════════════════════════ --}}
+            @include('docentes.partials.tutorias-panel')
 
             {{-- ══════════════════════════════════════════════════════
                  PANEL: OPCIONES
@@ -717,7 +858,6 @@
                 {{-- Layout: submenú izquierdo | contenido derecho --}}
                 <div class="flex gap-5 items-start"
                      x-data="{
-                         subOpcion:  '{{ session('activeTab') === 'opciones' && $errors->any() ? 'cambiar' : 'cambiar' }}',
                          actual:     '',
                          nueva:      '',
                          repite:     '',
@@ -739,8 +879,8 @@
                             <nav class="p-2 space-y-0.5">
 
                                 {{-- Cambiar contraseña --}}
-                                <button @click="subOpcion = 'cambiar'"
-                                        :class="subOpcion === 'cambiar'
+                                <button @click="opcionSubActiva = 'cambiar'"
+                                        :class="opcionSubActiva === 'cambiar'
                                             ? 'bg-purple-50 text-purple-700 font-semibold'
                                             : 'text-gray-500 hover:bg-slate-50 hover:text-gray-700'"
                                         class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left transition-colors">
@@ -752,8 +892,8 @@
                                 </button>
 
                                 {{-- Cerrar sesión --}}
-                                <button @click="subOpcion = 'cerrar'"
-                                        :class="subOpcion === 'cerrar'
+                                <button @click="opcionSubActiva = 'cerrar'"
+                                        :class="opcionSubActiva === 'cerrar'
                                             ? 'bg-red-50 text-red-600 font-semibold'
                                             : 'text-gray-500 hover:bg-red-50 hover:text-red-500'"
                                         class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left transition-colors">
@@ -772,7 +912,7 @@
                     <div class="flex-1 min-w-0">
 
                         {{-- ·· SUBPANEL: Cambiar contraseña ·· --}}
-                        <div x-show="subOpcion === 'cambiar'"
+                        <div x-show="opcionSubActiva === 'cambiar'"
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 translate-x-1"
                              x-transition:enter-end="opacity-100 translate-x-0">
@@ -906,7 +1046,7 @@
                         </div>{{-- /subpanel cambiar --}}
 
                         {{-- ·· SUBPANEL: Cerrar sesión ·· --}}
-                        <div x-show="subOpcion === 'cerrar'"
+                        <div x-show="opcionSubActiva === 'cerrar'"
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 translate-x-1"
                              x-transition:enter-end="opacity-100 translate-x-0">
@@ -931,7 +1071,7 @@
                                         </p>
                                     </div>
                                     <div class="flex gap-3">
-                                        <button @click="subOpcion = 'cambiar'"
+                                        <button @click="opcionSubActiva = 'cambiar'"
                                                 type="button"
                                                 class="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200
                                                        text-gray-500 hover:bg-slate-50 transition-colors">

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\personas\Docente;
@@ -52,6 +54,23 @@ Route::middleware(['auth:docente'])->group(function () {
         ->name('docentes.cambiar-contrasena');
     Route::post('/docente/cambiar-contrasena', [DocenteController::class, 'cambiarContrasena'])
         ->name('docentes.cambiar-contrasena.guardar');
+
+    // ── Módulo Grupos ────────────────────────────────────────────
+    Route::get('/docente/grupos/ciclos',                     [GrupoController::class, 'ciclos'])->name('docente.grupos.ciclos');
+    Route::get('/docente/grupos/datos',                      [GrupoController::class, 'datos'])->name('docente.grupos.datos');
+    Route::get('/docente/grupos/{id_grupo}/calificar',       [GrupoController::class, 'calificar'])->name('docente.grupos.calificar');
+    Route::post('/docente/grupos/calificacion',              [GrupoController::class, 'guardarCalificacion'])->name('docente.grupos.guardar-cal');
+    Route::post('/docente/grupos/desercion',                 [GrupoController::class, 'guardarDesercion'])->name('docente.grupos.desercion');
+    Route::get('/docente/grupos/{id_grupo}/reporte/inicio',  [GrupoController::class, 'reporteInicio'])->name('docente.grupos.reporte.inicio');
+    Route::get('/docente/grupos/{id_grupo}/reporte/intermedio', [GrupoController::class, 'reporteIntermedio'])->name('docente.grupos.reporte.intermedio');
+    Route::get('/docente/grupos/{id_grupo}/reporte/fin',     [GrupoController::class, 'reporteFin'])->name('docente.grupos.reporte.fin');
+
+    // ── Módulo Programa ──────────────────────────────────────────
+    Route::get('/docente/grupos/{id_grupo}/programa/datos',              [ProgramaController::class, 'datos'])->name('docente.programa.datos');
+    Route::post('/docente/grupos/{id_grupo}/programa/bibliografia',      [ProgramaController::class, 'guardarBibliografia'])->name('docente.programa.bibliografia');
+    Route::post('/docente/grupos/{id_grupo}/programa/tareas',            [ProgramaController::class, 'crearTarea'])->name('docente.programa.tareas.crear');
+    Route::delete('/docente/grupos/{id_grupo}/programa/tareas/{id_tarea}', [ProgramaController::class, 'eliminarTarea'])->name('docente.programa.tareas.eliminar');
+    Route::get('/docente/grupos/{id_grupo}/programa/estudiantes/descargar', [ProgramaController::class, 'descargarEstudiantes'])->name('docente.programa.estudiantes.descargar');
 
     // ── Cerrar sesión ────────────────────────────────────────────
     Route::post('/docente/logout', function () {

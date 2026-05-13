@@ -33,7 +33,11 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "classmap": [
+            "app/Models/catalagos",
+            "app/Models/operacion"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
